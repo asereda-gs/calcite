@@ -108,19 +108,32 @@ public class GeodeToEnumerableConverter extends ConverterImpl implements Enumera
 
     // Expression meta-program for calling the GeodeTable.GeodeQueryable#query
     // method form the generated code
+
+    //         List<Map.Entry<String, Class>> fields,
+    //        List<Map.Entry<String, String>> selectFields,
+    //        List<Map.Entry<String, String>> aggregateFunctions,
+    //        List<String> groupByFields,
+    //        List<String> predicates,
+    //        List<String> order,
+    //        String limit) {
     final BlockBuilder blockBuilder = new BlockBuilder().append(
         Expressions.call(
             geodeImplementContext.table.getExpression(GeodeTable.GeodeQueryable.class),
             GEODE_QUERY_METHOD,
+            // fields
             constantArrayList(Pair.zip(geodeFieldNames(rowType), physFieldClasses), Pair.class),
-            // physical fields
+            // selectFields
             constantArrayList(toListMapPairs(geodeImplementContext.selectFields), Pair.class),
-            // selected fields
+            // aggregateFunctions
             constantArrayList(
                 toListMapPairs(geodeImplementContext.oqlAggregateFunctions), Pair.class),
+            // groupByFields
             constantArrayList(geodeImplementContext.groupByFields, String.class),
+            // predicates
             constantArrayList(geodeImplementContext.whereClause, String.class),
+            // order
             constantArrayList(geodeImplementContext.orderByFields, String.class),
+            // limit
             Expressions.constant(geodeImplementContext.limitValue)));
 
     Hook.QUERY_PLAN.run(geodeImplementContext);

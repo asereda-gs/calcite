@@ -87,7 +87,7 @@ public class ElasticsearchFilter extends Filter implements ElasticsearchRel {
       implementor.add(translator.translateMatch(condition));
     } catch (IOException e) {
       throw new UncheckedIOException(e);
-    } catch (ExpressionNotAnalyzableException e) {
+    } catch (PredicateAnalyzer.ExpressionNotAnalyzableException e) {
       throw new RuntimeException(e);
     }
   }
@@ -103,7 +103,7 @@ public class ElasticsearchFilter extends Filter implements ElasticsearchRel {
       this.mapper = Objects.requireNonNull(mapper, "mapper");
     }
 
-    String translateMatch(RexNode condition) throws IOException, ExpressionNotAnalyzableException {
+    String translateMatch(RexNode condition) throws IOException, PredicateAnalyzer.ExpressionNotAnalyzableException {
 
       StringWriter writer = new StringWriter();
       JsonGenerator generator = mapper.getFactory().createGenerator(writer);

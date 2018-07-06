@@ -16,14 +16,27 @@
  */
 package org.apache.calcite.test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Internal util methods for ElasticSearch tests
  */
 public class ElasticsearchChecker {
+
+  private static final ObjectMapper MAPPER = new ObjectMapper()
+      .enable(SerializationFeature.INDENT_OUTPUT);
 
   private ElasticsearchChecker() {}
 
@@ -35,13 +48,26 @@ public class ElasticsearchChecker {
    */
   public static Consumer<List> elasticsearchChecker(final String... strings) {
     Objects.requireNonNull(strings, "strings");
-    return actual -> {
-      Object[] actualArray = actual == null || actual.isEmpty() ? null
-            : ((List) actual.get(0)).toArray();
-      CalciteAssert.assertArrayEqual("expected Elasticsearch query not found", strings,
-            actualArray);
+    return a -> {
+      ObjectNode actual = a == null || a.isEmpty() ? null
+            : ((ObjectNode) a.get(0));
+
+      try {
+
+        String json = "{" + Arrays.stream(strings).collect(Collectors.joining(",")) + "}";
+        ObjectNode expected = (ObjectNode) MAPPER.readTree(json);
+
+        if (!expected.equals(actual)) {
+          assertEquals("expected and actual Elasticsearch queries do not match",
+              MAPPER.writeValueAsString(expected),
+              MAPPER.writeValueAsString(actual));
+        }
+      } catch (IOException e) {
+        throw new UncheckedIOException(e);
+      }
     };
   }
+
 }
 
 // End ElasticsearchChecker.java
