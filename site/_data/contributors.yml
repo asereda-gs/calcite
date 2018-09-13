@@ -192,4 +192,9 @@
   githubId: Zhiqiang-He
   org: Huawei
   role: Committer
+- name: Andrei Sereda
+  apacheId: sereda
+  githubId: asereda-gs
+  org: 
+  role: Committer
 # End contributors.yml
